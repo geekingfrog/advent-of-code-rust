@@ -12,19 +12,16 @@ pub fn answer1() {
 pub fn answer2() {
     let freqs = get_frequencies();
     let mut seen : HashSet<i32> = HashSet::new();
-    let mut i = 0;
     let mut current : i32 = 0;
-    let l = freqs.len();
 
-    while !seen.contains(&current) {
-        seen.insert(current);
-        if i >= l {
-            i = 0;
+    for f in freqs.iter().cycle() {
+        if seen.contains(&current) {
+            println!("{}", current);
+            return;
         }
-        current = current + freqs[i];
-        i = i+1;
+        seen.insert(current);
+        current += f;
     }
-    println!("{}", current);
 }
 
 fn get_frequencies() -> Vec<i32> {
