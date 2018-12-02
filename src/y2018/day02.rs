@@ -45,16 +45,20 @@ pub fn answer2() {
 fn get_ids() -> Vec<String> {
     let f = File::open("data/2018/day02.txt").unwrap();
     let fd = BufReader::new(&f);
-    fd.lines().map(|x| x.unwrap()).collect()
+    fd.lines()
+        .map(|x| x.unwrap())
+        .collect()
 }
 
 fn has_value<K: Eq + Hash, V: Eq>(m : &HashMap<K, V>, x: V) -> bool {
-    for (_, v) in m.iter() {
-        if v == &x { return true; }
-    }
-    false
+    m.values()
+        .find(|v| *v == &x)
+        .is_some()
 }
 
 fn common_letters(x: &String, y: &String) -> String {
-    x.as_str().chars().zip(y.as_str().chars()).filter(|(c1, c2)| c1 == c2).map(|x| x.0).collect()
+    x.chars().zip(y.chars())
+        .filter(|(c1, c2)| c1 == c2)
+        .map(|x| x.0)
+        .collect()
 }
