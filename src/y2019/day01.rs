@@ -24,11 +24,11 @@ fn fuel(module_mass : i32) -> i32 {
         mass = cmp::max(mass / 3 - 2, 0);
         required_fuel += mass;
     }
-    return required_fuel;
+    required_fuel
 }
 
 fn read_modules() -> impl Iterator<Item = i32>{
     let f = File::open("data/2019/day01.txt").unwrap();
     let fd = BufReader::new(f);
-    return fd.lines().map(|x| i32::from_str_radix(&x.unwrap(), 10).unwrap());
+    fd.lines().map(|x| i32::from_str_radix(&x.unwrap(), 10).unwrap())
 }
