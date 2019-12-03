@@ -1,7 +1,66 @@
 use std::fs::File;
-// use std::io::BufRead;
 use std::io::Read;
-// use std::io::BufReader;
+
+
+struct Computer {
+    instruction_idx: usize,
+    codes: Vec<usize>,
+}
+
+#[derive(Debug)]
+enum ComputerError {
+    OutOfBound,
+    UnknownCode { code: usize },
+}
+
+enum StepResult {
+    Done,
+    Continue,
+}
+
+impl Computer {
+    fn new(codes: Vec<usize>) -> Computer {
+        Computer { instruction_idx: 0, codes: codes}
+    }
+
+    fn run(&mut self) -> Result<usize, ComputerError> {
+        loop {
+            let step_result = self.run_step()?;
+            match step_result {
+                StepResult::Done => break Ok(self.codes[0]),
+                StepResult::Continue => continue,
+            }
+        }
+    }
+
+    fn run_step(&mut self) -> Result<StepResult, ComputerError> {
+        if self.instruction_idx >= self.codes.len()
+        {
+            return Err(ComputerError::OutOfBound);
+        }
+
+        match self.codes[self.instruction_idx] {
+            1 => self.bin_op(&|x,y| x+y).map(|_| StepResult::Continue),
+            2 => self.bin_op(&|x,y| x*y).map(|_| StepResult::Continue),
+            99 => Ok(StepResult::Done),
+            c => Err(ComputerError::UnknownCode { code: c })
+        }
+    }
+
+    fn bin_op(&mut self, f: &dyn Fn(usize, usize) -> usize) -> Result<(), ComputerError>{
+        if self.instruction_idx + 3 >= self.codes.len()
+        {
+            return Err(ComputerError::OutOfBound);
+        }
+        let idx1 = self.codes[self.instruction_idx+1];
+        let idx2 = self.codes[self.instruction_idx+2];
+        let idx_res = self.codes[self.instruction_idx+3];
+        let result = f(self.codes[idx1], self.codes[idx2]);
+        self.codes[idx_res] = result;
+        self.instruction_idx = self.instruction_idx + 4;
+        Ok(())
+    }
+}
 
 pub fn answer1() {
     let mut f = File::open("data/2019/day02.txt").unwrap();
@@ -16,33 +75,11 @@ pub fn answer1() {
 
     codes[1] = 12;
     codes[2] = 2;
-
-    let mut idx = 0;
-    loop {
-        if idx >= codes.len() { break; }
-        let ins = codes[idx];
-        match ins {
-            1 => {
-                let idx1 = codes[idx+1];
-                let idx2 = codes[idx+2];
-                let idx_res = codes[idx+3];
-                let result = codes[idx1] + codes[idx2];
-                codes[idx_res] = result;
-            }
-            2 => {
-                let idx1 = codes[idx+1];
-                let idx2 = codes[idx+2];
-                let idx_res = codes[idx+3];
-                let result = codes[idx1] * codes[idx2];
-                codes[idx_res] = result;
-            }
-            99 => break,
-            _ => panic!("Unknown code: {}", ins)
-        }
-        idx = idx + 4;
+    let mut computer = Computer::new(codes);
+    match computer.run() {
+        Ok(result) => println!("{}", result),
+        Err(err) => panic!("error: {:?}", err),
     }
-
-    println!("{}", codes[0])
 }
 
 pub fn answer2() {
