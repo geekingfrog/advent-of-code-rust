@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::Read;
 
-
 struct Computer {
     instruction_idx: usize,
     codes: Vec<usize>,
@@ -67,14 +66,11 @@ pub fn answer1() {
     // let fd = BufReader::new(f);
     let mut buf = String::new();
     f.read_to_string(&mut buf).unwrap();
-    let mut codes : Vec<usize> = buf
-        .trim()
-        .split(',')
-        .map(|x| usize::from_str_radix(&x, 10).unwrap())
-        .collect();
+    let mut codes = read_codes();
 
     codes[1] = 12;
     codes[2] = 2;
+
     let mut computer = Computer::new(codes);
     match computer.run() {
         Ok(result) => println!("{}", result),
@@ -83,5 +79,35 @@ pub fn answer1() {
 }
 
 pub fn answer2() {
-    println!("{}", "coucou")
+    let codes = read_codes();
+
+    let target = 19690720;
+    for noun in 0..99 {
+        for verb in 0..99 {
+            let mut current_codes = codes.clone();
+            current_codes[1] = noun;
+            current_codes[2] = verb;
+            let mut computer = Computer::new(current_codes);
+            match computer.run() {
+                Ok(result) => {
+                    if result == target {
+                        println!("{}", noun * 100 + verb);
+                        return;
+                    }
+                },
+                Err(err) => panic!("error with noun: {}, verb {}: {:?}", noun, verb, err),
+            }
+        }
+    }
+    panic!("no solution found!")
+}
+
+fn read_codes() -> Vec<usize> {
+    let mut f = File::open("data/2019/day02.txt").unwrap();
+    let mut buf = String::new();
+    f.read_to_string(&mut buf).unwrap();
+    buf.trim()
+        .split(',')
+        .map(|x| usize::from_str_radix(&x, 10).unwrap())
+        .collect()
 }
