@@ -5,3 +5,5 @@ authors = ["Grégoire Charvet 黑瓜 <greg+git@geekingfrog.com>"]
 
 [dependencies]
 clap = "2.33.0"
+regex = "1"
+lazy_static = "1.4.0"
