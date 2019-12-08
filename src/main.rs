@@ -50,6 +50,8 @@ fn run2019(day: u8, pb_number: u8) {
         32 => y2019::day03::answer2(),
         41 => y2019::day04::answer1(),
         42 => y2019::day04::answer2(),
+        51 => y2019::day05::answer1(),
+        52 => y2019::day05::answer2(),
         _ => println!("Unknown pair day-pb number: {} - {}", day, pb_number),
     }
 }
