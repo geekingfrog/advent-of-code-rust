@@ -25,7 +25,6 @@ fn is_potential_password1(number: u32) -> bool {
 
 fn is_potential_password2(number: u32) -> bool {
     has_increasing_digits(number)
-        // && has_two_consecutive_identical_digits(number)
         && not_part_larget_group(number)
 }
 
