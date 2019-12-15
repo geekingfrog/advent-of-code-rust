@@ -8,7 +8,7 @@ pub fn answer1() {
 
     let mut computer = computer::Computer::new(codes);
     match computer.run() {
-        Ok(result) => println!("{}", result),
+        Ok(_) => println!("{}", computer.codes[0]),
         Err(err) => panic!("error: {:?}", err),
     }
 }
@@ -24,8 +24,8 @@ pub fn answer2() {
             current_codes[2] = verb;
             let mut computer = computer::Computer::new(current_codes);
             match computer.run() {
-                Ok(result) => {
-                    if result == target {
+                Ok(_) => {
+                    if computer.codes[0] == target {
                         println!("{}", noun * 100 + verb);
                         return;
                     }

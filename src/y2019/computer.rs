@@ -15,9 +15,17 @@ pub enum ComputerError {
     UnknownCode { code: i32 },
 }
 
-pub enum StepResult {
+enum StepResult {
     Done,
+    AwaitInput,
+    Output(i32),
     Continue,
+}
+
+pub enum RunResult {
+    Done,
+    AwaitInput,
+    Output(i32),
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -37,18 +45,24 @@ impl Computer {
         }
     }
 
-    pub fn run(&mut self) -> Result<i32, ComputerError> {
+    pub fn with_initial_input(&mut self, inputs: Vec<i32>) {
+        self.inputs = inputs;
+    }
+
+    pub fn run(&mut self) -> Result<RunResult, ComputerError> {
         loop {
             let step_result = self.run_step()?;
             match step_result {
-                StepResult::Done => break Ok(self.codes[0]),
+                StepResult::Done => break Ok(RunResult::Done),
+                StepResult::AwaitInput => break Ok(RunResult::AwaitInput),
                 StepResult::Continue => continue,
+                StepResult::Output(x) => break Ok(RunResult::Output(x)),
             }
         }
     }
 
-    pub fn run_with_inputs(&mut self, inputs: Vec<i32>) -> Result<i32, ComputerError> {
-        self.inputs = inputs;
+    pub fn run_with_inputs(&mut self, inputs: Vec<i32>) -> Result<RunResult, ComputerError> {
+        self.inputs.extend_from_slice(&inputs);
         self.run()
     }
 
@@ -59,28 +73,34 @@ impl Computer {
 
         let code = self.codes[self.instruction_idx];
         let opcode = code % 100;
-        // println!("{} - {:?}", self.instruction_idx, self.codes);
-        // println!("code {}", code);
         match opcode {
             1 => self
                 .binary_op(code, &|x, y| x + y)
                 .map(|_| StepResult::Continue),
+
             2 => self
                 .binary_op(code, &|x, y| x * y)
                 .map(|_| StepResult::Continue),
+
             3 => {
                 let addr = self.codes[self.instruction_idx + 1] as usize;
-                self.codes[addr] = self.inputs[self.input_idx];
-                self.input_idx += 1;
-                self.instruction_idx += 2;
-                Ok(StepResult::Continue)
+                if self.input_idx >= self.inputs.len() {
+                    Ok(StepResult::AwaitInput)
+                } else {
+                    self.codes[addr] = self.inputs[self.input_idx];
+                    self.input_idx += 1;
+                    self.instruction_idx += 2;
+                    Ok(StepResult::Continue)
+                }
             }
+
             4 => {
                 let output_val = self.get_val(code, 1);
                 self.outputs.push(output_val);
                 self.instruction_idx += 2;
-                Ok(StepResult::Continue)
+                Ok(StepResult::Output(output_val))
             }
+
             5 => {
                 let val1 = self.get_val(code, 1);
                 if val1 != 0 {
@@ -90,6 +110,7 @@ impl Computer {
                 }
                 Ok(StepResult::Continue)
             }
+
             6 => {
                 let val1 = self.get_val(code, 1);
                 if val1 == 0 {
@@ -99,6 +120,7 @@ impl Computer {
                 }
                 Ok(StepResult::Continue)
             }
+
             7 => {
                 let val1 = self.get_val(code, 1);
                 let val2 = self.get_val(code, 2);
@@ -108,6 +130,7 @@ impl Computer {
                 self.instruction_idx += 4;
                 Ok(StepResult::Continue)
             }
+
             8 => {
                 let val1 = self.get_val(code, 1);
                 let val2 = self.get_val(code, 2);
@@ -117,7 +140,9 @@ impl Computer {
                 self.instruction_idx += 4;
                 Ok(StepResult::Continue)
             }
+
             99 => Ok(StepResult::Done),
+
             c => Err(ComputerError::UnknownCode { code: c }),
         }
     }
