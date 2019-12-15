@@ -1,10 +1,11 @@
 #[macro_use]
 extern crate lazy_static;
+
 #[macro_use]
 extern crate clap;
 extern crate regex;
 
-use clap::{Arg, App};
+use clap::{App, Arg};
 
 mod y2018;
 mod y2019;
@@ -58,6 +59,8 @@ fn run2019(day: u8, pb_number: u8) {
         72 => y2019::day07::answer2(),
         81 => y2019::day08::answer1(),
         82 => y2019::day08::answer2(),
+        91 => y2019::day09::answer1(),
+        92 => y2019::day09::answer2(),
         _ => println!("Unknown pair day-pb number: {} - {}", day, pb_number),
     }
 }

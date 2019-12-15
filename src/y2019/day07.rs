@@ -1,26 +1,32 @@
 use y2019::computer;
 
 pub fn answer1() {
-    let codes = computer::read_codes("data/2019/day07.txt");
-    let result = permutations(0, 5)
-        .iter()
-        .map(|p| run_sequence(&codes, p))
-        .max()
-        .unwrap();
-    println!("{}", result);
+    println!("{}", solve1());
 }
 
 pub fn answer2() {
+    println!("{}", solve2());
+}
+
+fn solve1() -> i64 {
     let codes = computer::read_codes("data/2019/day07.txt");
-    let result = permutations(5, 10)
+    permutations(0, 5)
+        .iter()
+        .map(|p| run_sequence(&codes, p))
+        .max()
+        .unwrap()
+}
+
+fn solve2() -> i64 {
+    let codes = computer::read_codes("data/2019/day07.txt");
+    permutations(5, 10)
         .iter()
         .map(|p| run_sequence2(&codes, p))
         .max()
-        .unwrap();
-    println!("{}", result);
+        .unwrap()
 }
 
-fn permutations(start: i32, end: i32) -> Vec<Vec<i32>> {
+fn permutations(start: i64, end: i64) -> Vec<Vec<i64>> {
     // gruiiiiik
     let mut res = Vec::new();
     for a in start..end {
@@ -49,7 +55,7 @@ fn permutations(start: i32, end: i32) -> Vec<Vec<i32>> {
     res
 }
 
-fn run_sequence(codes: &Vec<i32>, sequence: &Vec<i32>) -> i32 {
+fn run_sequence(codes: &Vec<i64>, sequence: &Vec<i64>) -> i64 {
     sequence.iter().fold(0, |input, phase_setting| {
         let mut computer = computer::Computer::new(codes.clone());
         let res = computer
@@ -63,12 +69,12 @@ fn run_sequence(codes: &Vec<i32>, sequence: &Vec<i32>) -> i32 {
     })
 }
 
-fn run_sequence2(codes: &Vec<i32>, sequence: &Vec<i32>) -> i32 {
+fn run_sequence2(codes: &Vec<i64>, sequence: &Vec<i64>) -> i64 {
     let mut computers: Vec<Box<computer::Computer>> = sequence
         .iter()
         .map(|i| {
             let mut c = computer::Computer::new(codes.clone());
-            c.with_initial_input(vec![*i]);
+            c.with_input(vec![*i]);
             Box::new(c)
         })
         .collect();
@@ -143,5 +149,11 @@ mod test {
             53, 1001, 56, -1, 56, 1005, 56, 6, 99, 0, 0, 0, 0, 10,
         ];
         assert_eq!(run_sequence2(&codes, &vec![9, 7, 8, 5, 6]), 18216);
+    }
+
+    #[test]
+    fn test_computer_day07() {
+        assert_eq!(solve1(), 199988);
+        assert_eq!(solve2(), 17519904);
     }
 }
